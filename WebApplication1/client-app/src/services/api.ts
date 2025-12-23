@@ -1,7 +1,24 @@
 // src/services/api.ts
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://localhost:7000/api';
+// Determine the base API URL based on environment
+const getApiBaseUrl = (): string => {
+  if (typeof window !== 'undefined') {
+    // Client-side (browser)
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // Development
+      return 'https://localhost:7000/api';
+    } else {
+      // Production (Render) - use the same origin for API calls
+      // This means API calls will go to https://product-services-3nof.onrender.com/api
+      return `${window.location.protocol}//${window.location.host}/api`;
+    }
+  }
+  // Server-side (fallback)
+  return process.env.REACT_APP_API_URL || 'https://localhost:7000/api';
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -17,6 +34,8 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
+    // Ensure we're using the correct base URL
+    config.baseURL = getApiBaseUrl();
     return config;
   },
   (error) => {

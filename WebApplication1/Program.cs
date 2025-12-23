@@ -58,6 +58,17 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// Add CORS services
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader();
+    });
+});
+
 // Register custom services
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
@@ -78,10 +89,14 @@ app.UseDefaultFiles();
 app.UseStaticFiles();
 
 app.UseHttpsRedirection();
+
+// Use CORS (using default policy configured above)
+app.UseCors();
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-// Map controllers
+// Map controllers first
 app.MapControllers();
 
 // Serve React SPA, API routes take precedence
