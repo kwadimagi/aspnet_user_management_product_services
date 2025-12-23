@@ -73,21 +73,23 @@ builder.Services.AddCors(options =>
 builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
+// Build the app without running migrations yet
 var app = builder.Build();
 
-// Run migrations automatically on startup
+// Run database migrations and seed data - synchronous version
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        context.Database.EnsureCreated(); // Creates database if not exists
-        // Or use context.Database.Migrate(); for full migrations
+        // Use Migrate() instead of EnsureCreated() to run all pending migrations
+        context.Database.Migrate();
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while migrating the database.");
+        throw; // Re-throw to prevent the app from starting if migrations fail
     }
 }
 
