@@ -5,7 +5,8 @@ WORKDIR /app
 
 # Copy React app files
 COPY WebApplication1/client-app/package*.json ./
-RUN npm ci --only=production
+# Use npm install instead of ci to handle possible lock file issues
+RUN npm install --production
 
 COPY WebApplication1/client-app/ ./
 RUN npm run build
