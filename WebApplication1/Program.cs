@@ -76,19 +76,50 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Build the app without running migrations yet
 var app = builder.Build();
 
-// Run database initialization and schema creation
+// Run database initialization and schema creation with retry logic
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+
     try
     {
-        // Ensure database and schema exist
-        // Use EnsureCreated() which creates schema based on models without relying on migrations
-        context.Database.EnsureCreated();
+        // Attempt to create database schema with retry logic
+        for (int attempt = 1; attempt <= 3; attempt++)
+        {
+            try
+            {
+                // Wait a bit to ensure database connection is ready
+                if (attempt > 1)
+                {
+                    Task.Delay(TimeSpan.FromSeconds(attempt)).Wait(); // Increase delay with each attempt
+                }
+
+                // Ensure database and schema exist
+                context.Database.EnsureCreated();
+
+                // Test the connection by checking if we can access the database
+                var testQuery = context.Database.ExecuteSqlRaw("SELECT 1");
+
+                logger.LogInformation($"Database schema created successfully on attempt {attempt}");
+                break; // Success, exit retry loop
+            }
+            catch (Exception ex)
+            {
+                if (attempt == 3) // Last attempt
+                {
+                    logger.LogError(ex, "Failed to create database schema after {Attempts} attempts", attempt);
+                    throw;
+                }
+                else
+                {
+                    logger.LogWarning(ex, "Attempt {Attempt} to create database schema failed, retrying...", attempt);
+                }
+            }
+        }
     }
     catch (Exception ex)
     {
-        var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
         logger.LogError(ex, "An error occurred while creating the database schema.");
         throw; // Re-throw to prevent the app from starting if database creation fails
     }
