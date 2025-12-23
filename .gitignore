@@ -1,0 +1,62 @@
+# Build results
+bin/
+obj/
+out/
+
+# User-specific files
+.vs/
+.idea/
+*.userprefs
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Environment specific files
+.env
+appsettings.Production.json
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# Logs
+logs/
+*.log
+
+# Dependency directories
+jspm/
+jspm_packages/
+
+# IDEs
+.vscode/
+
+# Backend temp files
+*.db
+*.db-journal
+
+# Exclude nested git repositories
+WebApplication1/client-app/.git/
+
+# Secrets (do not commit)
+**/secrets.json
+**/local.settings.json
+**/appsettings.Development.json
+**/appsettings.Production.json
+**/appsettings.Staging.json
+**/secrets/
+**/config/

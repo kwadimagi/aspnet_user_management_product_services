@@ -1,0 +1,108 @@
+# ASP.NET Core (.NET 8) with React App CI/CD Pipeline
+# Build and test your .NET Core project and React app.
+# Deploy to Azure App Service.
+
+trigger:
+- main
+
+variables:
+  # Container registry service connection established during pipeline creation
+  dockerRegistryServiceConnection: 'your-docker-registry-service-connection'
+  imageRepository: 'webapplication1'
+  containerRegistry: 'yourcontainerregistry.azurecr.io'
+  dockerfilePath: '**/Dockerfile'
+  tag: '$(Build.BuildId)'
+  
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
+
+stages:
+- stage: Build
+  displayName: Build stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: NodeTool@0
+      inputs:
+        versionSpec: '18.x'
+      displayName: 'Install Node.js'
+      
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '8.x'
+      displayName: 'Install .NET 8 SDK'
+      
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'restore'
+        projects: '**/*.csproj'
+      displayName: 'Restore .NET packages'
+      
+    - task: Npm@1
+      inputs:
+        command: 'install'
+        workingDir: '$(System.DefaultWorkingDirectory)/WebApplication1/client-app'
+      displayName: 'Install React dependencies'
+      
+    - task: Npm@1
+      inputs:
+        command: 'run'
+        arguments: 'build'
+        workingDir: '$(System.DefaultWorkingDirectory)/WebApplication1/client-app'
+      displayName: 'Build React app'
+      
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'build'
+        projects: '**/*.csproj'
+        arguments: '--configuration Release --no-restore'
+      displayName: 'Build .NET project'
+      
+    - task: DotNetCoreCLI@2
+      inputs:
+        command: 'test'
+        projects: '**/*Tests.csproj'
+        arguments: '--configuration Release --no-build --collect "Code coverage"'
+      displayName: 'Run .NET tests'
+      
+    # Run React tests
+    - task: Npm@1
+      inputs:
+        command: 'run'
+        arguments: 'test'
+        workingDir: '$(System.DefaultWorkingDirectory)/WebApplication1/client-app'
+      displayName: 'Run React tests'
+      
+    - task: Docker@2
+      inputs:
+        command: 'buildAndPush'
+        repository: $(imageRepository)
+        dockerfile: $(dockerfilePath)
+        containerRegistry: $(dockerRegistryServiceConnection)
+        tags: |
+          $(tag)
+          latest
+
+- stage: Deploy
+  displayName: 'Deploy Stage'
+  condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+  dependsOn: Build
+  jobs:
+  - deployment: Deploy
+    displayName: Deploy job
+    pool:
+      vmImage: $(vmImageName)
+    environment: 'development'
+    strategy:
+      runOnce:
+        deploy:
+          steps:
+          - task: AzureWebAppContainer@1
+            inputs:
+              azureSubscription: 'your-azure-subscription'
+              appName: 'your-webapp-name'
+              containers: '$(containerRegistry)/$(imageRepository):$(tag)'
