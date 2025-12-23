@@ -33,42 +33,68 @@ const Register: React.FC = () => {
 
   return (
     <div className="form-container">
-      <h2>Register</h2>
+      <div className="login-header">
+        <div className="login-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" className="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+          </svg>
+        </div>
+        <h2>Create Account</h2>
+        <p className="subtitle">Join our platform today</p>
+      </div>
       
       {error && <div className="error">Error: {error}</div>}
       
-      <form onSubmit={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)} className="login-form">
         <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            type="email"
-            id="email"
-            {...register('email')}
-            className={errors.email ? 'error' : ''}
-          />
-          {errors.email?.message && <p className="error-text">{errors.email.message}</p>}
+          <label htmlFor="email">Email Address</label>
+          <div className="input-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+            <input
+              type="email"
+              id="email"
+              {...register('email')}
+              className={errors.email ? 'error' : ''}
+              placeholder="Enter your email"
+            />
+          </div>
+          {errors.email && <p className="error-text">{errors.email.message}</p>}
         </div>
         
         <div className="form-group">
           <label htmlFor="password">Password</label>
-          <input
-            type="password"
-            id="password"
-            {...register('password')}
-            className={errors.password ? 'error' : ''}
-          />
-          {errors.password?.message && <p className="error-text">{errors.password.message}</p>}
+          <div className="input-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
+            <input
+              type="password"
+              id="password"
+              {...register('password')}
+              className={errors.password ? 'error' : ''}
+              placeholder="Create a password"
+            />
+          </div>
+          {errors.password && <p className="error-text">{errors.password.message}</p>}
         </div>
         
         <div className="form-group">
           <label htmlFor="confirmPassword">Confirm Password</label>
-          <input
-            type="password"
-            id="confirmPassword"
-            {...register('confirmPassword')}
-            className={errors.confirmPassword ? 'error' : ''}
-          />
-          {errors.confirmPassword?.message && <p className="error-text">{errors.confirmPassword.message}</p>}
+          <div className="input-wrapper">
+            <svg xmlns="http://www.w3.org/2000/svg" className="input-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <input
+              type="password"
+              id="confirmPassword"
+              {...register('confirmPassword')}
+              className={errors.confirmPassword ? 'error' : ''}
+              placeholder="Confirm your password"
+            />
+          </div>
+          {errors.confirmPassword && <p className="error-text">{errors.confirmPassword.message}</p>}
         </div>
         
         <div className="form-actions">
@@ -77,13 +103,23 @@ const Register: React.FC = () => {
             disabled={isSubmitting}
             className="btn btn-primary"
           >
-            {isSubmitting ? 'Registering...' : 'Register'}
+            {isSubmitting ? (
+              <>
+                <svg className="btn-spinner" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Creating account...
+              </>
+            ) : 'Create Account'}
           </button>
         </div>
       </form>
       
       <div className="auth-links">
-        <p>Already have an account? <Link to="/login">Login here</Link></p>
+        <p className="signup-text">
+          Already have an account? <Link to="/login" className="link">Sign in here</Link>
+        </p>
       </div>
     </div>
   );
