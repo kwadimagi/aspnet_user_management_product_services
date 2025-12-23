@@ -73,9 +73,18 @@ if (app.Environment.IsDevelopment())
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
 
+// Serve static files (React build)
+app.UseDefaultFiles();
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map controllers
 app.MapControllers();
+
+// Serve React SPA, API routes take precedence
+app.MapFallbackToFile("index.html"); // Fallback everything else to index.html
 
 app.Run();
