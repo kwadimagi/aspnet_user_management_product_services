@@ -76,20 +76,21 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 // Build the app without running migrations yet
 var app = builder.Build();
 
-// Run database migrations and seed data - synchronous version
+// Run database initialization and schema creation
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
     try
     {
-        // Use Migrate() instead of EnsureCreated() to run all pending migrations
-        context.Database.Migrate();
+        // Ensure database and schema exist
+        // Use EnsureCreated() which creates schema based on models without relying on migrations
+        context.Database.EnsureCreated();
     }
     catch (Exception ex)
     {
         var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred while migrating the database.");
-        throw; // Re-throw to prevent the app from starting if migrations fail
+        logger.LogError(ex, "An error occurred while creating the database schema.");
+        throw; // Re-throw to prevent the app from starting if database creation fails
     }
 }
 
